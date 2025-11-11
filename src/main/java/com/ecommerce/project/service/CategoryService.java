@@ -1,16 +1,18 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.model.Category;
+import com.ecommerce.project.payload.CategoryRequestDTO;
+import com.ecommerce.project.payload.CategoryResponseDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 
 public interface CategoryService {
-    List<Category> getAllCategories();
-    void createCategory(Category category);
+    CategoryResponseDTO getAllCategories(Integer pageNumber, Integer pageSize);
+    CategoryRequestDTO createCategory(CategoryRequestDTO category);
 
-    String deleteCategory(Long categoryId);
+    CategoryRequestDTO deleteCategory(Long categoryId);
 
-    Category updateCategory(Category category, Long categoryId);
+    CategoryRequestDTO updateCategory(CategoryRequestDTO categoryRequestDTO, Long categoryId);
 }
