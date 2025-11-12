@@ -8,6 +8,7 @@ import com.ecommerce.project.payload.CategoryResponseDTO;
 import com.ecommerce.project.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,8 @@ public class CategoryServiceImpl implements CategoryService{
     public CategoryResponseDTO getAllCategories(Integer pageNumber, Integer pageSize) {
 
         Pageable pageDetails = PageRequest.of(pageNumber,pageSize);
-        List<Category> getCategory = categoryRepository.findAll();
+        Page<Category> categoryPage = categoryRepository.findAll(pageDetails);
+        List<Category> getCategory =  categoryPage.getContent();
         if(getCategory.isEmpty()){
             throw new APIException("No categories created till now");
         }
@@ -39,6 +41,11 @@ public class CategoryServiceImpl implements CategoryService{
 
         CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
         categoryResponseDTO.setContent(categoryDTOs);
+        categoryResponseDTO.setPageNumber(categoryPage.getNumber());
+        categoryResponseDTO.setPageSize(categoryPage.getSize());
+        categoryResponseDTO.setTotalElements(categoryPage.getTotalElements());
+        categoryResponseDTO.setTotalPages(categoryPage.getTotalPages());
+        categoryResponseDTO.setLastPage(categoryPage.isLast());
         return categoryResponseDTO;
     }
 
