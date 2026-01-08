@@ -1,9 +1,11 @@
 package com.ecommerce.project.exceptions;
 
 import com.ecommerce.project.payload.APIResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.hibernate.validator.internal.constraintvalidators.hv.ParameterScriptAssertValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +27,24 @@ public class GlobalExceptionHandler {
             response.put(fieldName,message);
         });
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<Map<String,String>> handleTransactionException(TransactionSystemException ex){
+        Throwable cause = ex.getRootCause();
+        if(cause instanceof ConstraintViolationException violationException){
+            Map<String,String> errors = new HashMap<>();
+            violationException.getConstraintViolations()
+                    .forEach(violation -> {
+                        String field = violation.getPropertyPath().toString();
+                        String message = violation.getMessage();
+                        errors.put(field,message);
+                    });
+            return new ResponseEntity<>(errors,HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(
+                Map.of("error","Transaction failed"),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
